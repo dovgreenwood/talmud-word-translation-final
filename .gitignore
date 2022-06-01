@@ -1,0 +1,4 @@
+word-maps/
+utils/searchable_jastrow.pickle
+src/languagetagger/dicta_all_words_only.csv
+database_makers/
