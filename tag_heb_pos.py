@@ -6,7 +6,7 @@ from utils.deconstruct import *
 data_path = './data/lang_tagged_talmud/'
 output_path = './data/pos_tagged_talmud/'
 
-# FIRST NEED TO ACTIVATE YAP API BY CALLING yap api FROM THE yap/ FOLDER
+# FIRST NEED TO ACTIVATE YAP API BY CALLING 'yap api' FROM THE yap/ FOLDER
 yap_host_address = 'http://localhost:8000/yap/heb/joint'
 
 

@@ -23,11 +23,25 @@ Python module dependencies: scikitlearn, pandas, numpy, requests, joblib. (There
 5. `translate_masekhet.py` -- Translates the text, linking each word in the Talmud to its proper location (RID) in the Jastrow.
 
 
-## Compiling the datasets
-The most essential datasets are compiled using the data and scripts found in the `database_makers` folder (not available on GitHub because they use proprietary data). `quick-jastrow` and `tag-jastrow` can be ignored, as they simply create a quickly searchable Jastrow word-to-RID dictionary and tag the Jastrow by probable language and POS (respectively). These scripts have already been run, do not need further modification, and their outputs have been exported to their proper locations. As for the other two:
+## A Guide to Compiling the datasets
+The most likely place in the pipeline in which issues will crop up is the final stage--that is, the matching up of words to Jastrow entries. Luckily, it is easy to fix any issues, although it requires manual intervention. This requires a not-too-deep understanding of how the pickled dictionaries in the `word-maps` folder were generated, so that the data can be re-generated. 
 
-1. `root-to-entry` contains independent scripts that map roots from the BDB, [Pealim](https://www.pealim.com/dict/) word tables, and Dicta Aramaic dataset to their most probable corresponding Jastrow entries. These can then be edited manually; this has been done for the entire Dicta dataset, but not the other two, as they are unqiedly and have extraneous words that necessarily will not appear in the Jastrow. Then, run the script that compiles these root-to-entry maps into pickled dictionaries.
-2. `word-to-entry` has scripts that take the outputs of `root-to-entry` and links directly from every individual word in the 3 datasets to the corresponding RIDs from the previous step. The output pickle files are sent directly to the `word-maps` folder.
+The `database_makers` folder has two sub-folders used to generate the datasets. The first is `root-to-entry`; this is where modifications will be made. This folder has scripts that match up the roots of words in several distinct datasets (one for each Talmudic language), which were compiled separately in an earlier step, to their most likely corresponding Jastrow headwords. These scripts (`X-to-jastrow.py`) should be ignored. **The files that will require manual modification are those labeled `X-to-jastrow.csv`, which contain the mappings of roots to most-likely headwords.** In these files, the leftmost column contains the roots from BDB, Dicta, and Pealim.com; the second column contains the POS (only for Pealim and Dicta); the rest of the columns contain the corresponding most-likely headwords in the Jastrow. To modify the mappings of an entry, simply insert and delete headwords as necessary, *without modifying the root or headword columns*. (Note that for the data from Pealim.com and BDB, there are roots that do not appear in the Talmud, and therefore do not appear in the Jastrow. This is why these are the datasets that are most likely to have issues, as it was to unwieldy to go through them manually to find issues, when I could not even tell whether it was possible to find a correspondence for a specific word.)
+
+After editing the files in this way, you will run `head_csv_to_rid_dict.py`. This script turns the CSV data into a pickled dictionary. Run it from the command line, and it takes to arguments: the first is the name of the file to compile, and the second is a 1 if the file contains a POS column, else a 0. (For example, for Jastrow you will want to run `python head_csv_to_rid_dict.py dicta_to_jastrow.csv 1`.) This will output a pickle file, `X_to_jastrow_rids.pickle`, in the same directory.
+
+Copy this file and paste it into `word-to-entry`. This next step is easier: simply run the corresponding script for the edited dataset in this folder. It will automatically output a new pickled dictionary file into the proper location to rerun the `translate_masekhet.py` script, and you're done! Just re-run the `translate_masekhet.py` script on all of the masekhtot after this; it will run quickly because the Hebrew cache will be fully loaded.
+
+![1](example1.png)
+
+Now, I need to re-compile the `pealim_to_jastrow.csv` file into a pickled dictionary. I do this by running the `head_csv_to_rid_dict.py` script with the following arguments:
+![2](example2.png)
+
+I move the compiled `pealim_to_jastrow_rids.pickle` file into `word-to-entry`, and run `pealim_word_to_entry.py` from there. After this, the database has been completely recompiled, and I'm done!
+
+
+## Editing the datasets: an example
+Since that might have been opaque, here is an example of the process of modifying one of the datasets with screenshots. First, I notice by looking at the output from the final step that there is an issue with a mapping--say, "התאבל" accidentally maps to "אָבֵל II," which is a noun, not the correct verb. So, we enter the `pealim_to_jastrow.csv` file, find the proper row, and modify the headword to map to "אָבֵל III":
 
 
 
